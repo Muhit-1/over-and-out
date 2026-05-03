@@ -70,14 +70,27 @@
   }
 
   .landing-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .badge-pill {
     background: var(--body-dark);
     color: var(--screen-amber);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    padding: 5px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 5px 12px;
     border-radius: 100px;
     text-transform: uppercase;
+    border: 1px solid rgba(255,179,0,0.2);
+  }
+  .badge-sep {
+    color: #bbb;
+    font-size: 14px;
+    line-height: 1;
   }
 
   .landing-title {
@@ -102,20 +115,20 @@
   .freq-card {
     background: var(--card-bg);
     border: 1.5px solid var(--card-border);
-    border-radius: 18px;
-    padding: 22px 24px 20px;
+    border-radius: 22px;
+    padding: 28px 28px 24px;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
   }
 
   .freq-card-label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 2.5px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--text-muted);
   }
@@ -123,19 +136,19 @@
   .freq-picker-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
   }
 
   /* ── 3-digit drum roller ── */
   .drum-roller {
     position: relative;
-    width: 114px;
-    height: 62px;
+    width: 140px;
+    height: 78px;
     overflow: hidden;
     cursor: ns-resize;
     user-select: none;
     touch-action: none;
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--text-main);
     box-shadow: inset 0 4px 14px rgba(0,0,0,0.6);
   }
@@ -155,7 +168,7 @@
     position: absolute;
     top: 50%; left: 0; right: 0;
     transform: translateY(-50%);
-    height: 28px;
+    height: 36px;
     border-top: 1px solid rgba(255,179,0,0.35);
     border-bottom: 1px solid rgba(255,179,0,0.35);
     pointer-events: none;
@@ -169,13 +182,13 @@
     will-change: transform;
   }
   .drum-item {
-    height: 28px;
-    width: 114px;
+    height: 36px;
+    width: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Orbitron', monospace;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 900;
     color: rgba(255,179,0,0.18);
     letter-spacing: 6px;
@@ -186,17 +199,17 @@
   .drum-item.selected { color: var(--screen-amber); text-shadow: 0 0 12px rgba(255,179,0,0.55); }
 
   /* ── single digit rollers ── */
-  .right-rollers { display: flex; gap: 5px; }
+  .right-rollers { display: flex; gap: 7px; }
 
   .single-roller {
     position: relative;
-    width: 34px;
-    height: 62px;
+    width: 44px;
+    height: 78px;
     overflow: hidden;
     cursor: ns-resize;
     user-select: none;
     touch-action: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--text-main);
     box-shadow: inset 0 4px 14px rgba(0,0,0,0.6);
   }
@@ -216,7 +229,7 @@
     position: absolute;
     top: 50%; left: 0; right: 0;
     transform: translateY(-50%);
-    height: 26px;
+    height: 34px;
     border-top: 1px solid rgba(255,179,0,0.35);
     border-bottom: 1px solid rgba(255,179,0,0.35);
     pointer-events: none;
@@ -230,13 +243,13 @@
     will-change: transform;
   }
   .single-item {
-    height: 26px;
-    width: 34px;
+    height: 34px;
+    width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Orbitron', monospace;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 900;
     color: rgba(255,179,0,0.18);
     flex-shrink: 0;
@@ -293,10 +306,10 @@
   .antenna {
     width: 7px;
     height: 88px;
-    background: linear-gradient(180deg, #606870 0%, #3e454d 50%, #2a2e32 100%);
+    background: linear-gradient(180deg, #c8d4dc 0%, #8a9aa8 20%, #606870 55%, #3e454d 80%, #2a2e32 100%);
     border-radius: 4px 4px 0 0;
     margin-bottom: -1px;
-    box-shadow: inset -1px 0 3px rgba(0,0,0,0.4);
+    box-shadow: 1px 0 4px rgba(0,0,0,0.4), -1px 0 2px rgba(255,255,255,0.08);
     position: relative;
   }
   .antenna::before {
@@ -304,27 +317,37 @@
     position: absolute;
     top: -5px; left: 50%; transform: translateX(-50%);
     width: 11px; height: 7px;
-    background: #3e454d;
+    background: linear-gradient(180deg, #a0b0bc, #6a7a88);
     border-radius: 3px 3px 0 0;
   }
 
   .radio-body {
     width: 228px;
-    background: linear-gradient(155deg, var(--body-hi) 0%, var(--body-mid) 35%, var(--body-dark) 100%);
+    background: linear-gradient(155deg, #4a5260 0%, #2e3540 20%, var(--body-dark) 60%, #1a1d22 100%);
     border-radius: 20px 20px 26px 26px;
     padding: 12px 13px 20px;
     position: relative;
-    border: 1.5px solid var(--body-edge);
+    border: 1.5px solid #5a6370;
     box-shadow:
-      inset 2px 2px 5px rgba(255,255,255,0.05),
-      inset -2px -2px 8px rgba(0,0,0,0.5);
+      /* outer silver highlight top */
+      0 -1px 0 rgba(255,255,255,0.12),
+      /* left silver rim */
+      -3px 0 8px rgba(180,195,210,0.12),
+      /* right shadow */
+      3px 0 8px rgba(0,0,0,0.4),
+      /* bottom depth */
+      0 8px 24px rgba(0,0,0,0.55),
+      /* inner gloss */
+      inset 2px 2px 6px rgba(200,215,230,0.09),
+      inset -2px -2px 8px rgba(0,0,0,0.55);
   }
+  /* silver top edge highlight */
   .radio-body::before {
     content: '';
     position: absolute;
     left: 0; top: 26px; bottom: 26px;
     width: 5px;
-    background: repeating-linear-gradient(180deg, #3e454d 0, #3e454d 3px, #1e2124 3px, #1e2124 6px);
+    background: repeating-linear-gradient(180deg, #6a7580 0, #6a7580 3px, #2a2e32 3px, #2a2e32 6px);
     border-radius: 3px 0 0 3px;
   }
   .radio-body::after {
@@ -332,8 +355,17 @@
     position: absolute;
     right: 0; top: 26px; bottom: 26px;
     width: 5px;
-    background: repeating-linear-gradient(180deg, #3e454d 0, #3e454d 3px, #1e2124 3px, #1e2124 6px);
+    background: repeating-linear-gradient(180deg, #6a7580 0, #6a7580 3px, #2a2e32 3px, #2a2e32 6px);
     border-radius: 0 3px 3px 0;
+  }
+  /* silver top strip */
+  .radio-body .silver-strip {
+    position: absolute;
+    top: 0; left: 14px; right: 14px;
+    height: 5px;
+    background: linear-gradient(90deg, #3a4148, #8a9aa8 30%, #c8d4dc 50%, #8a9aa8 70%, #3a4148);
+    border-radius: 20px 20px 0 0;
+    opacity: 0.7;
   }
 
   /* knobs */
@@ -527,7 +559,44 @@
     border: 1px solid #333;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.err  { border-color: #ff2244; color: #ff6680; }
+  /* credit box */
+  #credit-box {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(26, 28, 30, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 179, 0, 0.18);
+    border-radius: 10px;
+    padding: 6px 12px;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  #credit-box .credit-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--screen-amber);
+    box-shadow: 0 0 5px var(--screen-amber);
+    animation: blink 2s step-end infinite;
+    flex-shrink: 0;
+  }
+  #credit-box span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,179,0,0.75);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  #credit-box span em {
+    font-style: normal;
+    color: var(--screen-amber);
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -535,7 +604,8 @@
 <!-- LANDING -->
 <div id="landing">
   <div class="landing-inner">
-    <div class="landing-badge">▸ Half-duplex · WebRTC · Push to talk</div>
+    <div class="landing-badge">
+    </div>
     <div class="landing-title">Over &amp;<br><span class="highlight">&amp; Out</span></div>
     <div class="landing-desc">Pick a 5-digit frequency.<br>Hold to talk. Release to listen.</div>
 
@@ -571,6 +641,7 @@
 <div class="radio-wrap">
   <div class="antenna"></div>
   <div class="radio-body">
+    <div class="silver-strip"></div>
     <div class="knobs-row">
       <div class="knob-wrap">
         <div class="knob knob-green" id="knob-green"></div>
@@ -616,6 +687,12 @@
   </div>
 </div>
 
+<!-- CREDIT BOX -->
+<div id="credit-box">
+  <div class="credit-dot"></div>
+  <span>Over &amp; Out · built by <em>Muhit</em></span>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════
    FREQUENCY STATE
@@ -634,7 +711,7 @@ function updateScreenFreq() {
    3-DIGIT DRUM ROLLER
    Values: 000–999, repeated REPEATS times for infinite feel
 ══════════════════════════════════════════════════════ */
-const DRUM_H    = 28;
+const DRUM_H    = 36;
 const DRUM_REP  = 40;
 const DRUM_SPAN = 1000; // 000..999
 
@@ -749,7 +826,7 @@ function initDrum() {
 /* ══════════════════════════════════════════════════════
    SINGLE DIGIT ROLLERS (right 2 digits)
 ══════════════════════════════════════════════════════ */
-const SGL_H   = 26;
+const SGL_H   = 34;
 const SGL_REP = 60;
 
 function buildSingle(trackId, initVal) {
