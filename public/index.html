@@ -1,1117 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Over & Out — Web Walkie-Talkie</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:           #eaecee;
-    --body-dark:    #1e2124;
-    --body-mid:     #282c30;
-    --body-light:   #32383e;
-    --body-edge:    #141618;
-    --body-hi:      #3e454d;
-    --screen-bg:    #110d00;
-    --screen-amber: #ffb300;
-    --screen-dim:   #6a4800;
-    --green-on:     #00e87a;
-    --green-off:    #003322;
-    --red-on:       #ff2244;
-    --red-off:      #330011;
-    --card-bg:      #ffffff;
-    --card-border:  #d4d8dc;
-    --text-main:    #1a1c1e;
-    --text-muted:   #6b7280;
-  }
-
-  html, body { height: 100%; }
-
-  body {
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'DM Sans', sans-serif;
-    overflow: hidden;
-  }
-
-  /* ═══════════════════ LANDING */
-  #landing {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    transition: opacity 0.45s ease, transform 0.45s ease;
-  }
-  #landing.hidden {
-    opacity: 0;
-    transform: scale(1.04);
-    pointer-events: none;
-  }
-
-  .landing-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    max-width: 360px;
-    width: 100%;
-    padding: 0 24px;
-  }
-
-  .landing-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .badge-pill {
-    background: var(--body-dark);
-    color: var(--screen-amber);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 5px 12px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    border: 1px solid rgba(255,179,0,0.2);
-  }
-  .badge-sep {
-    color: #bbb;
-    font-size: 14px;
-    line-height: 1;
-  }
-
-  .landing-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(34px, 9vw, 52px);
-    font-weight: 900;
-    color: var(--text-main);
-    letter-spacing: -1px;
-    line-height: 1;
-    text-align: center;
-  }
-  .landing-title .highlight { color: var(--screen-amber); }
-
-  .landing-desc {
-    font-size: 14px;
-    color: var(--text-muted);
-    text-align: center;
-    line-height: 1.65;
-  }
-
-  /* Frequency card */
-  .freq-card {
-    background: var(--card-bg);
-    border: 1.5px solid var(--card-border);
-    border-radius: 22px;
-    padding: 28px 28px 24px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-  }
-
-  .freq-card-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .freq-picker-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  /* ── 3-digit drum roller ── */
-  .drum-roller {
-    position: relative;
-    width: 140px;
-    height: 78px;
-    overflow: hidden;
-    cursor: ns-resize;
-    user-select: none;
-    touch-action: none;
-    border-radius: 14px;
-    background: var(--text-main);
-    box-shadow: inset 0 4px 14px rgba(0,0,0,0.6);
-  }
-  .drum-roller::before,
-  .drum-roller::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 18px;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .drum-roller::before { top: 0; background: linear-gradient(180deg, rgba(26,28,30,0.96), transparent); }
-  .drum-roller::after  { bottom: 0; background: linear-gradient(0deg, rgba(26,28,30,0.96), transparent); }
-
-  .drum-hl {
-    position: absolute;
-    top: 50%; left: 0; right: 0;
-    transform: translateY(-50%);
-    height: 36px;
-    border-top: 1px solid rgba(255,179,0,0.35);
-    border-bottom: 1px solid rgba(255,179,0,0.35);
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .drum-track {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    will-change: transform;
-  }
-  .drum-item {
-    height: 36px;
-    width: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 24px;
-    font-weight: 900;
-    color: rgba(255,179,0,0.18);
-    letter-spacing: 6px;
-    flex-shrink: 0;
-    transition: color 0.05s;
-  }
-  .drum-item.near     { color: rgba(255,179,0,0.5); }
-  .drum-item.selected { color: var(--screen-amber); text-shadow: 0 0 12px rgba(255,179,0,0.55); }
-
-  /* ── single digit rollers ── */
-  .right-rollers { display: flex; gap: 7px; }
-
-  .single-roller {
-    position: relative;
-    width: 44px;
-    height: 78px;
-    overflow: hidden;
-    cursor: ns-resize;
-    user-select: none;
-    touch-action: none;
-    border-radius: 12px;
-    background: var(--text-main);
-    box-shadow: inset 0 4px 14px rgba(0,0,0,0.6);
-  }
-  .single-roller::before,
-  .single-roller::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 14px;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .single-roller::before { top: 0; background: linear-gradient(180deg, rgba(26,28,30,0.96), transparent); }
-  .single-roller::after  { bottom: 0; background: linear-gradient(0deg, rgba(26,28,30,0.96), transparent); }
-
-  .single-hl {
-    position: absolute;
-    top: 50%; left: 0; right: 0;
-    transform: translateY(-50%);
-    height: 34px;
-    border-top: 1px solid rgba(255,179,0,0.35);
-    border-bottom: 1px solid rgba(255,179,0,0.35);
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .single-track {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    will-change: transform;
-  }
-  .single-item {
-    height: 34px;
-    width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 20px;
-    font-weight: 900;
-    color: rgba(255,179,0,0.18);
-    flex-shrink: 0;
-  }
-  .single-item.near     { color: rgba(255,179,0,0.5); }
-  .single-item.selected { color: var(--screen-amber); text-shadow: 0 0 10px rgba(255,179,0,0.5); }
-
-  .freq-dot-sep {
-    font-family: 'Orbitron', monospace;
-    font-size: 24px;
-    color: #bbb;
-    line-height: 1;
-  }
-
-  .tune-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: var(--text-main);
-    color: var(--screen-amber);
-    font-family: 'Orbitron', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.18s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
-  }
-  .tune-btn:hover {
-    background: #2a2f35;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.2);
-    transform: translateY(-1px);
-  }
-  .tune-btn:active { transform: translateY(1px); }
-
-  .landing-hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: #bbb;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-
-  /* ═══════════════════ RADIO */
-  .radio-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    filter: drop-shadow(0 22px 44px rgba(0,0,0,0.22)) drop-shadow(0 4px 10px rgba(0,0,0,0.12));
-  }
-
-  .antenna {
-    width: 7px;
-    height: 88px;
-    background: linear-gradient(180deg, #c8d4dc 0%, #8a9aa8 20%, #606870 55%, #3e454d 80%, #2a2e32 100%);
-    border-radius: 4px 4px 0 0;
-    margin-bottom: -1px;
-    box-shadow: 1px 0 4px rgba(0,0,0,0.4), -1px 0 2px rgba(255,255,255,0.08);
-    position: relative;
-  }
-  .antenna::before {
-    content: '';
-    position: absolute;
-    top: -5px; left: 50%; transform: translateX(-50%);
-    width: 11px; height: 7px;
-    background: linear-gradient(180deg, #a0b0bc, #6a7a88);
-    border-radius: 3px 3px 0 0;
-  }
-
-  .radio-body {
-    width: 228px;
-    background: linear-gradient(155deg, #4a5260 0%, #2e3540 20%, var(--body-dark) 60%, #1a1d22 100%);
-    border-radius: 20px 20px 26px 26px;
-    padding: 12px 13px 20px;
-    position: relative;
-    border: 1.5px solid #5a6370;
-    box-shadow:
-      /* outer silver highlight top */
-      0 -1px 0 rgba(255,255,255,0.12),
-      /* left silver rim */
-      -3px 0 8px rgba(180,195,210,0.12),
-      /* right shadow */
-      3px 0 8px rgba(0,0,0,0.4),
-      /* bottom depth */
-      0 8px 24px rgba(0,0,0,0.55),
-      /* inner gloss */
-      inset 2px 2px 6px rgba(200,215,230,0.09),
-      inset -2px -2px 8px rgba(0,0,0,0.55);
-  }
-  /* silver top edge highlight */
-  .radio-body::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 26px; bottom: 26px;
-    width: 5px;
-    background: repeating-linear-gradient(180deg, #6a7580 0, #6a7580 3px, #2a2e32 3px, #2a2e32 6px);
-    border-radius: 3px 0 0 3px;
-  }
-  .radio-body::after {
-    content: '';
-    position: absolute;
-    right: 0; top: 26px; bottom: 26px;
-    width: 5px;
-    background: repeating-linear-gradient(180deg, #6a7580 0, #6a7580 3px, #2a2e32 3px, #2a2e32 6px);
-    border-radius: 0 3px 3px 0;
-  }
-  /* silver top strip */
-  .radio-body .silver-strip {
-    position: absolute;
-    top: 0; left: 14px; right: 14px;
-    height: 5px;
-    background: linear-gradient(90deg, #3a4148, #8a9aa8 30%, #c8d4dc 50%, #8a9aa8 70%, #3a4148);
-    border-radius: 20px 20px 0 0;
-    opacity: 0.7;
-  }
-
-  /* knobs */
-  .knobs-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 8px;
-    margin-bottom: 10px;
-  }
-  .knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .knob { width: 26px; height: 26px; border-radius: 50%; transition: all 0.15s; }
-
-  .knob-green {
-    background: radial-gradient(circle at 35% 35%, #1a3328, var(--green-off));
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.7);
-    border: 1.5px solid #002211;
-  }
-  .knob-green.active {
-    background: radial-gradient(circle at 35% 35%, #aaffd4, var(--green-on));
-    box-shadow: 0 0 14px rgba(0,232,122,0.95), 0 0 32px rgba(0,232,122,0.35), inset 0 1px 3px rgba(255,255,255,0.2);
-    border-color: #00e87a;
-  }
-  .knob-red {
-    background: radial-gradient(circle at 35% 35%, #3a0f1a, var(--red-off));
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.7);
-    border: 1.5px solid #220008;
-  }
-  .knob-red.active {
-    background: radial-gradient(circle at 35% 35%, #ffaabc, var(--red-on));
-    box-shadow: 0 0 14px rgba(255,34,68,0.95), 0 0 32px rgba(255,34,68,0.35), inset 0 1px 3px rgba(255,255,255,0.15);
-    border-color: #ff2244;
-    animation: pulse-red 0.55s ease-in-out infinite alternate;
-  }
-  @keyframes pulse-red {
-    from { box-shadow: 0 0 14px rgba(255,34,68,0.9), 0 0 32px rgba(255,34,68,0.3); }
-    to   { box-shadow: 0 0 22px rgba(255,34,68,1.0), 0 0 50px rgba(255,34,68,0.55); }
-  }
-
-  .knob-label { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: #444; letter-spacing: 0.5px; text-transform: uppercase; }
-  .knob-brand { font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700; color: #555; letter-spacing: 1.5px; }
-
-  /* screen */
-  .screen-bezel {
-    background: #0c0e0f;
-    border-radius: 10px;
-    padding: 4px;
-    margin-bottom: 11px;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.9), 0 0 0 1px #080a0b;
-  }
-  .screen {
-    background: var(--screen-bg);
-    border-radius: 7px;
-    padding: 9px 11px;
-    position: relative;
-    min-height: 96px;
-    overflow: hidden;
-  }
-  .screen::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
-    pointer-events: none;
-    z-index: 2;
-    border-radius: 7px;
-  }
-  .screen::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 7px;
-    box-shadow: inset 0 0 26px rgba(255,152,0,0.07);
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .screen-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-    position: relative;
-    z-index: 4;
-  }
-  .status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--screen-dim);
-    transition: all 0.2s;
-  }
-  .status-dot.on { background: var(--screen-amber); box-shadow: 0 0 5px var(--screen-amber); animation: blink 1s step-end infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-  .user-count {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: var(--screen-dim);
-    letter-spacing: 1px;
-    position: relative;
-    z-index: 4;
-    transition: color 0.3s;
-  }
-  .user-count.live { color: var(--screen-amber); }
-
-  .screen-freq {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 4px;
-    margin: 2px 0 7px;
-    position: relative;
-    z-index: 4;
-  }
-  .sf-left  { font-family: 'Orbitron', monospace; font-size: 30px; font-weight: 900; color: var(--screen-amber); text-shadow: 0 0 10px rgba(255,179,0,0.7), 0 0 22px rgba(255,152,0,0.3); letter-spacing: 2px; line-height: 1; }
-  .sf-dot   { font-family: 'Orbitron', monospace; font-size: 20px; color: var(--screen-dim); padding-bottom: 2px; }
-  .sf-right { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; color: rgba(255,179,0,0.65); text-shadow: 0 0 8px rgba(255,179,0,0.35); letter-spacing: 1px; line-height: 1; }
-
-  .screen-status {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    text-align: center;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--screen-dim);
-    position: relative;
-    z-index: 4;
-    min-height: 13px;
-    transition: color 0.2s;
-  }
-  .screen-status.transmit { color: #00e87a; text-shadow: 0 0 7px rgba(0,232,122,0.6); }
-  .screen-status.busy     { color: var(--red-on); text-shadow: 0 0 7px rgba(255,34,68,0.6); animation: flicker 0.18s infinite; }
-  @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.72} }
-
-  /* grille */
-  .speaker-grille { display: flex; flex-direction: column; gap: 3px; margin-bottom: 11px; padding: 0 6px; }
-  .grille-row { display: flex; gap: 3px; }
-  .grille-slot { flex: 1; height: 5px; background: #111416; border-radius: 2px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.9); }
-
-  /* PTT */
-  .ptt-section { display: flex; justify-content: center; margin-bottom: 11px; }
-  .ptt-btn {
-    width: 150px;
-    height: 46px;
-    border-radius: 25px;
-    background: linear-gradient(180deg, #2e3338 0%, #1a1d20 60%, #111315 100%);
-    border: none;
-    cursor: pointer;
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #555;
-    text-transform: uppercase;
-    outline: none;
-    box-shadow: 0 4px 0 #0a0c0d, 0 5px 10px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
-    transition: all 0.08s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .ptt-btn:disabled { cursor: not-allowed; opacity: 0.4; }
-  .ptt-btn:not(:disabled):hover { background: linear-gradient(180deg, #363c42 0%, #22272b 60%, #181c1f 100%); }
-  .ptt-btn:not(:disabled):active,
-  .ptt-btn.pressing {
-    background: linear-gradient(180deg, #ff7700 0%, #cc4400 100%);
-    color: #fff;
-    text-shadow: 0 0 8px rgba(255,200,0,0.7);
-    box-shadow: 0 1px 0 #661e00, 0 2px 5px rgba(255,102,0,0.4), inset 0 2px 4px rgba(0,0,0,0.3);
-    transform: translateY(3px);
-  }
-
-  /* keypad */
-  .keypad { display: grid; grid-template-columns: repeat(5,1fr); gap: 3px; padding: 0 4px; }
-  .key { height: 10px; background: linear-gradient(180deg, #3e454d 0%, #282c30 100%); border-radius: 3px; box-shadow: 0 2px 0 #111315; }
-
-  /* toast */
-  #toast {
-    position: fixed;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%) translateY(60px);
-    background: var(--text-main);
-    color: #ddd;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    padding: 9px 18px;
-    border-radius: 8px;
-    letter-spacing: 1px;
-    transition: transform 0.3s ease;
-    z-index: 300;
-    white-space: nowrap;
-    border: 1px solid #333;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  /* credit box */
-  #credit-box {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    background: rgba(26, 28, 30, 0.88);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 179, 0, 0.18);
-    border-radius: 10px;
-    padding: 6px 12px;
-    z-index: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  }
-  #credit-box .credit-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--screen-amber);
-    box-shadow: 0 0 5px var(--screen-amber);
-    animation: blink 2s step-end infinite;
-    flex-shrink: 0;
-  }
-  #credit-box span {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: rgba(255,179,0,0.75);
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-  #credit-box span em {
-    font-style: normal;
-    color: var(--screen-amber);
-    font-weight: 600;
-  }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Over & Out — Web Walkie-Talkie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<!-- LANDING -->
-<div id="landing">
-  <div class="landing-inner">
-    <div class="landing-badge">
-    </div>
-    <div class="landing-title">Over &amp;<br><span class="highlight">&amp; Out</span></div>
-    <div class="landing-desc">Pick a 5-digit frequency.<br>Hold to talk. Release to listen.</div>
+  <!-- ── Landing Screen ──────────────────────────────────────────────────── -->
+  <div id="landing">
+    <div class="landing-inner">
+      <div class="landing-badge"></div>
 
-    <div class="freq-card">
-      <div class="freq-card-label">Select Frequency</div>
-      <div class="freq-picker-row">
-        <div class="drum-roller" id="drum-roller">
-          <div class="drum-hl"></div>
-          <div class="drum-track" id="drum-track"></div>
-        </div>
-        <div class="freq-dot-sep">·</div>
-        <div class="right-rollers">
-          <div class="single-roller" id="roller-a">
-            <div class="single-hl"></div>
-            <div class="single-track" id="track-a"></div>
+      <div class="landing-title">Over &amp;<br><span class="highlight">&amp; Out</span></div>
+      <div class="landing-desc">Pick a 5-digit frequency.<br>Hold to talk. Release to listen.</div>
+
+      <div class="freq-card">
+        <div class="freq-card-label">Select Frequency</div>
+        <div class="freq-picker-row">
+          <!-- 3-digit drum roller -->
+          <div class="drum-roller" id="drum-roller">
+            <div class="drum-hl"></div>
+            <div class="drum-track" id="drum-track"></div>
           </div>
-          <div class="single-roller" id="roller-b">
-            <div class="single-hl"></div>
-            <div class="single-track" id="track-b"></div>
+
+          <div class="freq-dot-sep">·</div>
+
+          <!-- 2 single-digit rollers -->
+          <div class="right-rollers">
+            <div class="single-roller" id="roller-a">
+              <div class="single-hl"></div>
+              <div class="single-track" id="track-a"></div>
+            </div>
+            <div class="single-roller" id="roller-b">
+              <div class="single-hl"></div>
+              <div class="single-track" id="track-b"></div>
+            </div>
           </div>
         </div>
+
+        <button class="tune-btn" id="tune-btn">▶ &nbsp; Tune In</button>
       </div>
-      <button class="tune-btn" id="tune-btn">▶ &nbsp; Tune In</button>
-    </div>
-    <div class="landing-hint">scroll · drag · swipe to adjust digits</div>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- RADIO -->
-<div class="radio-wrap">
-  <div class="antenna"></div>
-  <div class="radio-body">
-    <div class="silver-strip"></div>
-    <div class="knobs-row">
-      <div class="knob-wrap">
-        <div class="knob knob-green" id="knob-green"></div>
-        <div class="knob-label">TX</div>
-      </div>
-      <div class="knob-brand">O&amp;O</div>
-      <div class="knob-wrap">
-        <div class="knob knob-red" id="knob-red"></div>
-        <div class="knob-label">BUSY</div>
-      </div>
-    </div>
-
-    <div class="screen-bezel">
-      <div class="screen">
-        <div class="screen-top">
-          <div class="status-dot" id="status-dot"></div>
-          <div class="user-count" id="user-count">— / 8</div>
-        </div>
-        <div class="screen-freq">
-          <div class="sf-left" id="sf-left">000</div>
-          <div class="sf-dot">·</div>
-          <div class="sf-right" id="sf-right">00</div>
-        </div>
-        <div class="screen-status" id="screen-status">STANDBY</div>
-      </div>
-    </div>
-
-    <div class="speaker-grille">
-      <div class="grille-row"><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div></div>
-      <div class="grille-row"><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div></div>
-      <div class="grille-row"><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div><div class="grille-slot"></div></div>
-    </div>
-
-    <div class="ptt-section">
-      <button class="ptt-btn" id="ptt-btn" disabled>Push to Talk</button>
-    </div>
-
-    <div class="keypad">
-      <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
-      <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
-      <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+      <div class="landing-hint">scroll · drag · swipe to adjust digits</div>
     </div>
   </div>
-</div>
 
-<!-- CREDIT BOX -->
-<div id="credit-box">
-  <div class="credit-dot"></div>
-  <span>Over &amp; Out · built by <em>Muhit</em></span>
-</div>
+  <!-- ── Toast Notification ──────────────────────────────────────────────── -->
+  <div id="toast"></div>
 
-<script>
-/* ══════════════════════════════════════════════════════
-   FREQUENCY STATE
-══════════════════════════════════════════════════════ */
-const freq = { left: 148, right: [2, 1] };
+  <!-- ── Radio Body ──────────────────────────────────────────────────────── -->
+  <div class="radio-wrap">
+    <div class="antenna"></div>
+    <div class="radio-body">
+      <div class="silver-strip"></div>
 
-function getFreqString() {
-  return String(freq.left).padStart(3,'0') + freq.right.join('');
-}
-function updateScreenFreq() {
-  document.getElementById('sf-left').textContent  = String(freq.left).padStart(3,'0');
-  document.getElementById('sf-right').textContent = freq.right.join('');
-}
+      <!-- Status knobs -->
+      <div class="knobs-row">
+        <div class="knob-wrap">
+          <div class="knob knob-green" id="knob-green"></div>
+          <div class="knob-label">TX</div>
+        </div>
+        <div class="knob-brand">O&amp;O</div>
+        <div class="knob-wrap">
+          <div class="knob knob-red" id="knob-red"></div>
+          <div class="knob-label">BUSY</div>
+        </div>
+      </div>
 
-/* ══════════════════════════════════════════════════════
-   3-DIGIT DRUM ROLLER
-   Values: 000–999, repeated REPEATS times for infinite feel
-══════════════════════════════════════════════════════ */
-const DRUM_H    = 36;
-const DRUM_REP  = 40;
-const DRUM_SPAN = 1000; // 000..999
+      <!-- LCD Screen -->
+      <div class="screen-bezel">
+        <div class="screen">
+          <div class="screen-top">
+            <div class="status-dot" id="status-dot"></div>
+            <div class="user-count" id="user-count">— / 8</div>
+          </div>
+          <div class="screen-freq">
+            <div class="sf-left"  id="sf-left">000</div>
+            <div class="sf-dot">·</div>
+            <div class="sf-right" id="sf-right">00</div>
+          </div>
+          <div class="screen-status" id="screen-status">STANDBY</div>
+        </div>
+      </div>
 
-let drumIdx   = 0; // float index into the long list
-let drumDrag  = { active: false, startY: 0, startIdx: 0, lastY: 0, lastT: 0, vel: 0 };
+      <!-- Speaker grille -->
+      <div class="speaker-grille">
+        <div class="grille-row">
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+        </div>
+        <div class="grille-row">
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+        </div>
+        <div class="grille-row">
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+          <div class="grille-slot"></div><div class="grille-slot"></div>
+        </div>
+      </div>
 
-function buildDrum() {
-  const track = document.getElementById('drum-track');
-  track.innerHTML = '';
-  for (let r = 0; r < DRUM_REP; r++) {
-    for (let v = 0; v < DRUM_SPAN; v++) {
-      const d = document.createElement('div');
-      d.className = 'drum-item';
-      d.textContent = String(v).padStart(3,'0');
-      track.appendChild(d);
-    }
-  }
-  // start in middle repeat at current value
-  drumIdx = Math.floor(DRUM_REP / 2) * DRUM_SPAN + freq.left;
-  drumRender(true);
-  drumHighlight();
-}
+      <!-- Push to Talk -->
+      <div class="ptt-section">
+        <button class="ptt-btn" id="ptt-btn" disabled>Push to Talk</button>
+      </div>
 
-function drumBounds(idx) {
-  const lo = DRUM_SPAN;
-  const hi = (DRUM_REP - 1) * DRUM_SPAN;
-  if (idx < lo) idx += DRUM_SPAN * Math.ceil((lo - idx) / DRUM_SPAN);
-  if (idx > hi) idx -= DRUM_SPAN * Math.ceil((idx - hi) / DRUM_SPAN);
-  return idx;
-}
+      <!-- Decorative keypad -->
+      <div class="keypad">
+        <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+        <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+        <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+      </div>
+    </div>
+  </div>
 
-function drumRender(instant) {
-  const track = document.getElementById('drum-track');
-  const roller = document.getElementById('drum-roller');
-  const rh = roller.offsetHeight || 62;
-  const y = (rh / 2) - drumIdx * DRUM_H - DRUM_H / 2;
-  track.style.transition = instant ? 'none' : 'transform 0.13s cubic-bezier(0.22,1,0.36,1)';
-  track.style.transform = `translateY(${y}px)`;
-}
+  <!-- ── Credit ───────────────────────────────────────────────────────────── -->
+  <div id="credit-box">
+    <div class="credit-dot"></div>
+    <span>Over &amp; Out · built by <em>Muhit</em></span>
+  </div>
 
-function drumHighlight() {
-  const track = document.getElementById('drum-track');
-  const ci = Math.round(drumIdx);
-  const items = track.children;
-  for (let i = 0; i < items.length; i++) {
-    const d = Math.abs(i - ci);
-    items[i].className = 'drum-item' + (d === 0 ? ' selected' : d === 1 ? ' near' : '');
-  }
-  freq.left = ci % DRUM_SPAN;
-  updateScreenFreq();
-}
+  <!-- ── Scripts (ES modules) ─────────────────────────────────────────────── -->
+  <script type="module" src="/js/main.js"></script>
 
-function drumSnap() {
-  drumIdx = drumBounds(Math.round(drumIdx));
-  drumRender(false);
-  drumHighlight();
-}
-
-function initDrum() {
-  const roller = document.getElementById('drum-roller');
-
-  // Mouse
-  roller.addEventListener('mousedown', (e) => {
-    drumDrag = { active: true, startY: e.clientY, startIdx: drumIdx, lastY: e.clientY, lastT: Date.now(), vel: 0 };
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!drumDrag.active) return;
-    const now = Date.now(), dt = Math.max(1, now - drumDrag.lastT);
-    drumDrag.vel = (e.clientY - drumDrag.lastY) / dt;
-    drumDrag.lastY = e.clientY; drumDrag.lastT = now;
-    drumIdx = drumBounds(drumDrag.startIdx + (drumDrag.startY - e.clientY) / DRUM_H);
-    drumRender(true); drumHighlight();
-  });
-  window.addEventListener('mouseup', () => {
-    if (!drumDrag.active) return;
-    drumDrag.active = false;
-    if (Math.abs(drumDrag.vel) > 0.4) drumIdx = drumBounds(drumIdx - drumDrag.vel * 9);
-    drumSnap();
-  });
-
-  // Touch
-  roller.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    drumDrag = { active: true, startY: t.clientY, startIdx: drumIdx, lastY: t.clientY, lastT: Date.now(), vel: 0 };
-    e.preventDefault();
-  }, { passive: false });
-  roller.addEventListener('touchmove', (e) => {
-    if (!drumDrag.active) return;
-    const t = e.touches[0], now = Date.now(), dt = Math.max(1, now - drumDrag.lastT);
-    drumDrag.vel = (t.clientY - drumDrag.lastY) / dt;
-    drumDrag.lastY = t.clientY; drumDrag.lastT = now;
-    drumIdx = drumBounds(drumDrag.startIdx + (drumDrag.startY - t.clientY) / DRUM_H);
-    drumRender(true); drumHighlight();
-    e.preventDefault();
-  }, { passive: false });
-  roller.addEventListener('touchend', () => {
-    if (!drumDrag.active) return;
-    drumDrag.active = false;
-    if (Math.abs(drumDrag.vel) > 0.4) drumIdx = drumBounds(drumIdx - drumDrag.vel * 9);
-    drumSnap();
-  });
-
-  // Wheel
-  roller.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    drumIdx = drumBounds(drumIdx + (e.deltaY > 0 ? 1 : -1));
-    drumSnap();
-  }, { passive: false });
-}
-
-/* ══════════════════════════════════════════════════════
-   SINGLE DIGIT ROLLERS (right 2 digits)
-══════════════════════════════════════════════════════ */
-const SGL_H   = 34;
-const SGL_REP = 60;
-
-function buildSingle(trackId, initVal) {
-  const track = document.getElementById(trackId);
-  track.innerHTML = '';
-  for (let r = 0; r < SGL_REP; r++) {
-    for (let v = 0; v <= 9; v++) {
-      const d = document.createElement('div');
-      d.className = 'single-item';
-      d.textContent = v;
-      track.appendChild(d);
-    }
-  }
-  const state = { idx: Math.floor(SGL_REP / 2) * 10 + initVal, drag: { active: false, startY: 0, startIdx: 0, lastY: 0, lastT: 0, vel: 0 } };
-  sglRender(track, trackId, state, true);
-  sglHighlight(track, state);
-  return state;
-}
-
-function sglBounds(idx) {
-  const lo = 10, hi = (SGL_REP - 1) * 10;
-  if (idx < lo) idx += 10 * Math.ceil((lo - idx) / 10);
-  if (idx > hi) idx -= 10 * Math.ceil((idx - hi) / 10);
-  return idx;
-}
-
-function sglRender(track, rollerId, state, instant) {
-  const roller = document.getElementById(rollerId.replace('track-','roller-'));
-  const rh = roller ? (roller.offsetHeight || 62) : 62;
-  const y = (rh / 2) - state.idx * SGL_H - SGL_H / 2;
-  track.style.transition = instant ? 'none' : 'transform 0.13s cubic-bezier(0.22,1,0.36,1)';
-  track.style.transform = `translateY(${y}px)`;
-}
-
-function sglHighlight(track, state) {
-  const ci = Math.round(state.idx);
-  const items = track.children;
-  for (let i = 0; i < items.length; i++) {
-    const d = Math.abs(i - ci);
-    items[i].className = 'single-item' + (d === 0 ? ' selected' : d === 1 ? ' near' : '');
-  }
-  return ci % 10;
-}
-
-function sglSnap(track, rollerId, state, freqPos) {
-  state.idx = sglBounds(Math.round(state.idx));
-  sglRender(track, rollerId, state, false);
-  const val = sglHighlight(track, state);
-  freq.right[freqPos] = val;
-  updateScreenFreq();
-}
-
-function initSingle(rollerId, trackId, freqPos) {
-  const roller = document.getElementById(rollerId);
-  const track  = document.getElementById(trackId);
-  const state  = sglStates[freqPos];
-
-  roller.addEventListener('mousedown', (e) => {
-    state.drag = { active: true, startY: e.clientY, startIdx: state.idx, lastY: e.clientY, lastT: Date.now(), vel: 0 };
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!state.drag.active) return;
-    const now = Date.now(), dt = Math.max(1, now - state.drag.lastT);
-    state.drag.vel = (e.clientY - state.drag.lastY) / dt;
-    state.drag.lastY = e.clientY; state.drag.lastT = now;
-    state.idx = sglBounds(state.drag.startIdx + (state.drag.startY - e.clientY) / SGL_H);
-    sglRender(track, rollerId, state, true); sglHighlight(track, state);
-  });
-  window.addEventListener('mouseup', () => {
-    if (!state.drag.active) return;
-    state.drag.active = false;
-    if (Math.abs(state.drag.vel) > 0.4) state.idx = sglBounds(state.idx - state.drag.vel * 9);
-    sglSnap(track, rollerId, state, freqPos);
-  });
-
-  roller.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    state.drag = { active: true, startY: t.clientY, startIdx: state.idx, lastY: t.clientY, lastT: Date.now(), vel: 0 };
-    e.preventDefault();
-  }, { passive: false });
-  roller.addEventListener('touchmove', (e) => {
-    if (!state.drag.active) return;
-    const t = e.touches[0], now = Date.now(), dt = Math.max(1, now - state.drag.lastT);
-    state.drag.vel = (t.clientY - state.drag.lastY) / dt;
-    state.drag.lastY = t.clientY; state.drag.lastT = now;
-    state.idx = sglBounds(state.drag.startIdx + (state.drag.startY - t.clientY) / SGL_H);
-    sglRender(track, rollerId, state, true); sglHighlight(track, state);
-    e.preventDefault();
-  }, { passive: false });
-  roller.addEventListener('touchend', () => {
-    if (!state.drag.active) return;
-    state.drag.active = false;
-    if (Math.abs(state.drag.vel) > 0.4) state.idx = sglBounds(state.idx - state.drag.vel * 9);
-    sglSnap(track, rollerId, state, freqPos);
-  });
-
-  roller.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    state.idx = sglBounds(state.idx + (e.deltaY > 0 ? 1 : -1));
-    sglSnap(track, rollerId, state, freqPos);
-  }, { passive: false });
-}
-
-const sglStates = [
-  buildSingle('track-a', freq.right[0]),
-  buildSingle('track-b', freq.right[1]),
-];
-initSingle('roller-a', 'track-a', 0);
-initSingle('roller-b', 'track-b', 1);
-
-/* ══════════════════════════════════════════════════════
-   UI HELPERS
-══════════════════════════════════════════════════════ */
-const knobGreen  = document.getElementById('knob-green');
-const knobRed    = document.getElementById('knob-red');
-const screenStat = document.getElementById('screen-status');
-const statusDot  = document.getElementById('status-dot');
-const userCount  = document.getElementById('user-count');
-const pttBtn     = document.getElementById('ptt-btn');
-
-function setStatus(mode, text) { screenStat.className = `screen-status${mode ? ' '+mode : ''}`; screenStat.textContent = text; }
-function setKnobs(tx, busy)    { knobGreen.classList.toggle('active', tx); knobRed.classList.toggle('active', busy); }
-function updateUserCount(c, m) { userCount.textContent = `${c} / ${m}`; userCount.classList.toggle('live', c >= 1); }
-
-let toastTimer = null;
-function showToast(msg, err = false) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show' + (err ? ' err' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ''; }, 3000);
-}
-
-/* ══════════════════════════════════════════════════════
-   APP STATE + WEBSOCKET
-══════════════════════════════════════════════════════ */
-const S = { joined: false, userId: null, channelBusy: false, transmitting: false, peers: new Map(), localStream: null };
-let ws = null, pttActive = false;
-
-function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}`);
-  ws.onmessage = async (e) => { await handleMsg(JSON.parse(e.data)); };
-  ws.onclose   = () => setTimeout(connectWS, 2000);
-}
-function wsSend(m) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(m)); }
-
-async function handleMsg(msg) {
-  switch (msg.type) {
-    case 'joined':
-      S.userId = msg.userId; S.joined = true;
-      updateUserCount(msg.count, msg.max);
-      statusDot.classList.add('on');
-      setStatus('', 'STANDBY');
-      pttBtn.disabled = false;
-      document.getElementById('landing').classList.add('hidden');
-      if (msg.transmitterId) { S.channelBusy = true; setStatus('busy','SOMEONE IS TALKING'); setKnobs(false,true); }
-      wsSend({ type: 'get_peers' });
-      break;
-    case 'peers':
-      for (const pid of msg.peers) if (!S.peers.has(pid)) await createPC(pid, true);
-      break;
-    case 'user_count': updateUserCount(msg.count, msg.max); break;
-    case 'channel_busy':
-      S.channelBusy = true;
-      if (!S.transmitting) { setStatus('busy','SOMEONE IS TALKING'); setKnobs(false,true); }
-      break;
-    case 'channel_free':
-      S.channelBusy = false;
-      if (!S.transmitting) { setStatus('','STANDBY'); setKnobs(false,false); }
-      break;
-    case 'ptt_granted':
-      S.transmitting = true; setStatus('transmit','TRANSMITTING'); setKnobs(true,false); await startTx();
-      break;
-    case 'ptt_released':
-      S.transmitting = false; pttActive = false; pttBtn.classList.remove('pressing');
-      await stopTx(); setStatus('','STANDBY'); setKnobs(false,false);
-      break;
-    case 'ptt_denied':
-      pttActive = false; pttBtn.classList.remove('pressing');
-      showToast('⚡ Channel busy — wait for STANDBY', true);
-      break;
-    case 'error':
-      showToast(msg.message, true);
-      if (msg.code === 'FULL') { document.getElementById('landing').classList.remove('hidden'); S.joined = false; }
-      break;
-    case 'offer': await handleOffer(msg); break;
-    case 'answer': await handleAnswer(msg); break;
-    case 'ice_candidate': await handleIce(msg); break;
-  }
-}
-
-/* ══════════════════════════════════════════════════════
-   WEBRTC
-══════════════════════════════════════════════════════ */
-const RTC = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
-const audioMap = new Map();
-
-async function createPC(pid, init) {
-  if (S.peers.has(pid)) return S.peers.get(pid);
-  const pc = new RTCPeerConnection(RTC);
-  S.peers.set(pid, pc);
-  if (S.localStream) S.localStream.getTracks().forEach(t => pc.addTrack(t, S.localStream));
-  pc.ontrack = (e) => {
-    let a = audioMap.get(pid); if (!a) { a = new Audio(); a.autoplay = true; audioMap.set(pid, a); }
-    a.srcObject = e.streams[0];
-  };
-  pc.onicecandidate = (e) => { if (e.candidate) wsSend({ type:'ice_candidate', targetId: pid, candidate: e.candidate }); };
-  pc.onconnectionstatechange = () => {
-    if (['failed','disconnected','closed'].includes(pc.connectionState)) {
-      pc.close(); S.peers.delete(pid);
-      const a = audioMap.get(pid); if (a) { a.srcObject = null; audioMap.delete(pid); }
-    }
-  };
-  if (init) {
-    const off = await pc.createOffer({ offerToReceiveAudio: true });
-    await pc.setLocalDescription(off);
-    wsSend({ type:'offer', targetId: pid, sdp: pc.localDescription });
-  }
-  return pc;
-}
-async function handleOffer(msg) {
-  const pc = await createPC(msg.senderId, false);
-  await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-  const ans = await pc.createAnswer();
-  await pc.setLocalDescription(ans);
-  wsSend({ type:'answer', targetId: msg.senderId, sdp: pc.localDescription });
-}
-async function handleAnswer(msg) { const pc = S.peers.get(msg.senderId); if (pc) await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp)); }
-async function handleIce(msg)    { const pc = S.peers.get(msg.senderId); if (pc) try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch {} }
-
-async function startTx() {
-  try {
-    if (!S.localStream) S.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    for (const [,pc] of S.peers) {
-      const snd = pc.getSenders();
-      if (!snd.some(s => s.track?.kind === 'audio')) S.localStream.getAudioTracks().forEach(t => pc.addTrack(t, S.localStream));
-      else snd.forEach(s => { if (s.track?.kind === 'audio') s.track.enabled = true; });
-    }
-    S.localStream.getAudioTracks().forEach(t => { t.enabled = true; });
-  } catch { showToast('⚠ Microphone access denied', true); wsSend({ type:'ptt_stop' }); }
-}
-async function stopTx() {
-  if (S.localStream) S.localStream.getAudioTracks().forEach(t => { t.enabled = false; });
-}
-
-/* ══════════════════════════════════════════════════════
-   PTT
-══════════════════════════════════════════════════════ */
-function pttPress() {
-  if (!S.joined || pttActive) return;
-  pttActive = true; pttBtn.classList.add('pressing');
-  wsSend({ type: 'ptt_start' });
-}
-function pttRelease() {
-  if (!S.joined) return;
-  if (S.transmitting) wsSend({ type: 'ptt_stop' });
-  else { pttActive = false; pttBtn.classList.remove('pressing'); }
-}
-
-pttBtn.addEventListener('mousedown', pttPress);
-pttBtn.addEventListener('mouseup', pttRelease);
-pttBtn.addEventListener('mouseleave', () => { if (pttActive && S.transmitting) pttRelease(); });
-pttBtn.addEventListener('touchstart', (e) => { e.preventDefault(); pttPress(); }, { passive: false });
-pttBtn.addEventListener('touchend',   (e) => { e.preventDefault(); pttRelease(); }, { passive: false });
-document.addEventListener('keydown', (e) => { if (e.code==='Space' && e.target===document.body && !e.repeat) { e.preventDefault(); pttPress(); } });
-document.addEventListener('keyup',   (e) => { if (e.code==='Space' && e.target===document.body) { e.preventDefault(); pttRelease(); } });
-
-/* ══════════════════════════════════════════════════════
-   TUNE IN
-══════════════════════════════════════════════════════ */
-document.getElementById('tune-btn').addEventListener('click', () => {
-  const f = getFreqString();
-  wsSend({ type: 'join', freq: f });
-  showToast(`Tuning to ${f.slice(0,3)}·${f.slice(3)}…`);
-});
-
-/* ══════════════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════════════ */
-buildDrum();
-initDrum();
-updateScreenFreq();
-connectWS();
-</script>
 </body>
 </html>

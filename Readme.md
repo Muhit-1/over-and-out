@@ -1,4 +1,4 @@
-# 🎙️ RadioLink — Web Walkie-Talkie
+# 🎙️ Over & Out — Web Walkie-Talkie
 
 A browser-based walkie-talkie using WebRTC audio and WebSocket signaling.
 Half-duplex · 5-digit frequencies · Up to 8 users per channel.
@@ -8,46 +8,51 @@ Half-duplex · 5-digit frequencies · Up to 8 users per channel.
 ## 📁 Project Structure
 
 ```
-walkie-talkie/
-├── server.js          ← Node.js signaling server (WebSocket + Express)
-├── package.json       ← Dependencies
-├── README.md          ← This file
-└── public/
-    └── index.html     ← Full walkie-talkie UI (no build step needed)
+over-and-out/
+├── src/
+│   ├── server.ts          ← Node.js signaling server (TypeScript)
+│   └── types.ts           ← Shared message & state types
+├── public/
+│   ├── index.html         ← Markup only — no inline CSS or JS
+│   ├── css/
+│   │   └── style.css      ← All styles
+│   └── js/
+│       ├── main.js        ← Entry point — boots the app
+│       ├── app.js         ← WebSocket, PTT controls, message handler
+│       ├── webrtc.js      ← RTCPeerConnection mesh logic
+│       ├── rollers.js     ← Drum roller & single-digit roller UI
+│       ├── freq.js        ← Frequency state & screen updates
+│       └── ui.js          ← Shared UI helpers (toast, knobs, status)
+├── dist/                  ← Compiled JS output (git-ignored)
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 ---
 
-## 🚀 Setup in VS Code
+## 🚀 Setup
 
-### Step 1 — Install dependencies
-Open the **integrated terminal** in VS Code (`Ctrl + `` ` ```) and run:
-
+### Install dependencies
 ```bash
 npm install
 ```
 
-This installs: `express`, `ws`, `uuid`
-
-### Step 2 — Start the server
-
+### Option A — Run directly with ts-node (dev)
 ```bash
-node server.js
+npm run dev
+```
+
+### Option B — Compile then run (production)
+```bash
+npm run build
+npm start
 ```
 
 You should see:
 ```
-🎙️  Walkie-Talkie server running at http://localhost:3000
+🎙️  Over & Out server running at http://localhost:3000
 ```
-
-### Step 3 — Open in browser
-
-Go to: **http://localhost:3000**
-
-To test with multiple users, open the same URL in:
-- Another browser tab
-- Another browser (Chrome + Firefox)
-- Another device on the same Wi-Fi network using your local IP (e.g. `http://192.168.1.x:3000`)
 
 ---
 
@@ -69,7 +74,7 @@ To test with multiple users, open the same URL in:
 |---------|---------|
 | `STANDBY` | Channel is free |
 | `TRANSMITTING` | You are broadcasting |
-| `SOMEONE IS TALKING` | Channel is occupied by another user |
+| `SOMEONE IS TALKING` | Channel is occupied |
 
 ---
 
@@ -78,7 +83,7 @@ To test with multiple users, open the same URL in:
 - Chrome, Edge, or Firefox (Safari works with limitations)
 - **Microphone permission** must be granted when prompted
 - Works over `localhost` without HTTPS
-- For production deployment over the internet, you'll need HTTPS + a TURN server
+- For production over the internet, HTTPS + a TURN server is required
 
 ---
 
@@ -88,5 +93,5 @@ To test with multiple users, open the same URL in:
 |---------|-----|
 | No audio heard | Check mic permission in browser address bar |
 | "Frequency full" | Max 8 users per frequency — try a different channel |
-| Can't connect between devices | Make sure they're on the same network and use your LAN IP |
+| Can't connect between devices | Ensure same network; use your LAN IP |
 | WebRTC fails across networks | Needs a TURN server for NAT traversal (not included) |
