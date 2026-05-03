@@ -12,11 +12,15 @@ export const S = {
   userId: null,
   channelBusy: false,
   transmitting: false,
+  duplexMode: false,
 };
 
 let ws        = null;
 let pttActive = false;
-let pttTouchActive = false;   // tracks whether PTT was activated by touch
+let pttTouchActive = false;
+
+const duplexBtn    = document.getElementById("duplex-btn");
+const antennaSecond = document.getElementById("antenna-second");
 
 export function wsSend(msg) {
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -36,6 +40,7 @@ async function handleMsg(msg) {
       statusDot.classList.add("on");
       setStatus("", "STANDBY");
       pttBtn.disabled = false;
+      duplexBtn.disabled = false;
       document.getElementById("landing").classList.add("hidden");
       if (msg.transmitterId) {
         S.channelBusy = true;
@@ -58,7 +63,7 @@ async function handleMsg(msg) {
 
     case "channel_busy":
       S.channelBusy = true;
-      if (!S.transmitting) {
+      if (!S.transmitting && !S.duplexMode) {
         setStatus("busy", "SOMEONE IS TALKING");
         setKnobs(false, true);
       }
@@ -67,7 +72,7 @@ async function handleMsg(msg) {
     case "channel_free":
       S.channelBusy = false;
       if (!S.transmitting) {
-        setStatus("", "STANDBY");
+        setStatus("", S.duplexMode ? "DUPLEX OPEN" : "STANDBY");
         setKnobs(false, false);
       }
       break;
@@ -85,7 +90,7 @@ async function handleMsg(msg) {
       pttTouchActive = false;
       pttBtn.classList.remove("pressing");
       stopTransmit();
-      setStatus("", "STANDBY");
+      setStatus("", S.duplexMode ? "DUPLEX OPEN" : "STANDBY");
       setKnobs(false, false);
       break;
 
@@ -110,10 +115,42 @@ async function handleMsg(msg) {
   }
 }
 
+// ─── Duplex Toggle ────────────────────────────────────────────────────────────
+
+function toggleDuplex() {
+  if (!S.joined) return;
+  S.duplexMode = !S.duplexMode;
+
+  duplexBtn.classList.toggle("active", S.duplexMode);
+  antennaSecond.classList.toggle("visible", S.duplexMode);
+
+  if (S.duplexMode) {
+    // Activate mic continuously — unmute tracks immediately
+    startTransmit();
+    // PTT becomes unavailable in duplex mode
+    pttBtn.disabled = true;
+    setStatus("transmit", "DUPLEX OPEN");
+    setKnobs(true, false);
+    showToast("⇄ Duplex ON — both sides can talk");
+  } else {
+    // Mute mic, return to PTT mode
+    stopTransmit();
+    pttBtn.disabled = false;
+    if (S.channelBusy) {
+      setStatus("busy", "SOMEONE IS TALKING");
+      setKnobs(false, true);
+    } else {
+      setStatus("", "STANDBY");
+      setKnobs(false, false);
+    }
+    showToast("⇄ Duplex OFF — push to talk");
+  }
+}
+
 // ─── PTT Controls ─────────────────────────────────────────────────────────────
 
 function pttPress() {
-  if (!S.joined || pttActive) return;
+  if (!S.joined || pttActive || S.duplexMode) return;
   pttActive = true;
   pttBtn.classList.add("pressing");
   wsSend({ type: "ptt_start" });
@@ -130,6 +167,13 @@ function pttRelease() {
 }
 
 export function initPTT() {
+  // ── Duplex button ──────────────────────────────────────────────────────────
+  duplexBtn.addEventListener("click", toggleDuplex);
+  duplexBtn.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    toggleDuplex();
+  }, { passive: false });
+
   // ── Touch events (primary on mobile) ──────────────────────────────────────
   pttBtn.addEventListener("touchstart", (e) => {
     e.preventDefault();           // prevents the ghost mousedown that follows

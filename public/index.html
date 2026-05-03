@@ -54,7 +54,10 @@
 
   <!-- ── Radio Body ──────────────────────────────────────────────────────── -->
   <div class="radio-wrap">
-    <div class="antenna"></div>
+    <div class="antennas-wrap">
+      <div class="antenna antenna-main"></div>
+      <div class="antenna antenna-second" id="antenna-second"></div>
+    </div>
     <div class="radio-body">
       <div class="silver-strip"></div>
 
@@ -108,6 +111,14 @@
         <button class="ptt-btn" id="ptt-btn" disabled>Push to Talk</button>
       </div>
 
+      <!-- Duplex Toggle -->
+      <div class="duplex-section">
+        <button class="duplex-btn" id="duplex-btn" disabled>
+          <span class="duplex-icon">⇄</span>
+          <span class="duplex-label">DUPLEX</span>
+        </button>
+      </div>
+
       <!-- Decorative keypad -->
       <div class="keypad">
         <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
@@ -120,7 +131,7 @@
   <!-- ── Credit ───────────────────────────────────────────────────────────── -->
   <div id="credit-box">
     <div class="credit-dot"></div>
-    <span>Over &amp; Out · built by <em>Muhit</em></span>
+    <span>Over &amp; Out · built by <a href="https://github.com/Muhit-1/over-and-out" target="_blank" rel="noopener noreferrer"><em>Muhit</em></a></span>
   </div>
 
   <!-- ── Scripts (ES modules) ─────────────────────────────────────────────── -->

@@ -294,14 +294,22 @@ body {
   filter: drop-shadow(0 22px 44px rgba(0,0,0,0.22)) drop-shadow(0 4px 10px rgba(0,0,0,0.12));
 }
 
+.antennas-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: -1px;
+}
+
 .antenna {
   width: 7px;
   height: 88px;
   background: linear-gradient(180deg, #c8d4dc 0%, #8a9aa8 20%, #606870 55%, #3e454d 80%, #2a2e32 100%);
   border-radius: 4px 4px 0 0;
-  margin-bottom: -1px;
   box-shadow: 1px 0 4px rgba(0,0,0,0.4), -1px 0 2px rgba(255,255,255,0.08);
   position: relative;
+  flex-shrink: 0;
 }
 .antenna::before {
   content: '';
@@ -310,6 +318,37 @@ body {
   width: 11px; height: 7px;
   background: linear-gradient(180deg, #a0b0bc, #6a7a88);
   border-radius: 3px 3px 0 0;
+}
+
+/* Second antenna — hidden by default, slides in from the right */
+.antenna-second {
+  transform-origin: bottom center;
+  transform: scaleY(0) translateY(10px);
+  opacity: 0;
+  transition:
+    transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.4s ease;
+  height: 72px; /* slightly shorter for visual variety */
+}
+.antenna-second.visible {
+  transform: scaleY(1) translateY(0);
+  opacity: 1;
+}
+.antenna-second::after {
+  content: '';
+  position: absolute;
+  top: 8px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, rgba(255,179,0,0.6) 0%, rgba(255,179,0,0.1) 60%, transparent 100%);
+  border-radius: 2px;
+  animation: none;
+}
+.antenna-second.visible::after {
+  animation: antenna-pulse 1.8s ease-in-out infinite;
+}
+@keyframes antenna-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }
 
 .radio-body {
@@ -502,7 +541,7 @@ body {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #555;
+  color: #aaaaaa;
   text-transform: uppercase;
   outline: none;
   box-shadow: 0 4px 0 #0a0c0d, 0 5px 10px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
@@ -523,6 +562,75 @@ body {
 /* keypad */
 .keypad { display: grid; grid-template-columns: repeat(5,1fr); gap: 3px; padding: 0 4px; }
 .key { height: 10px; background: linear-gradient(180deg, #3e454d 0%, #282c30 100%); border-radius: 3px; box-shadow: 0 2px 0 #111315; }
+
+/* duplex */
+.duplex-section { display: flex; justify-content: center; margin-bottom: 11px; }
+
+.duplex-btn {
+  width: 150px;
+  height: 32px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #1e2328 0%, #141719 100%);
+  border: 1.5px solid #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  outline: none;
+  box-shadow: 0 3px 0 #0a0b0c, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.duplex-btn:disabled { cursor: not-allowed; opacity: 0.35; }
+.duplex-btn:not(:disabled):hover {
+  background: linear-gradient(180deg, #262c32 0%, #191d20 100%);
+  border-color: #444;
+}
+.duplex-btn:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0a0b0c;
+}
+
+.duplex-icon {
+  font-size: 13px;
+  color: #44505a;
+  transition: color 0.25s, text-shadow 0.25s;
+  line-height: 1;
+}
+.duplex-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  color: #44505a;
+  text-transform: uppercase;
+  transition: color 0.25s;
+}
+
+/* active duplex */
+.duplex-btn.active {
+  background: linear-gradient(180deg, #1a2a1e 0%, #0e1a11 100%);
+  border-color: rgba(0,232,122,0.45);
+  box-shadow: 0 3px 0 #040d06, 0 0 14px rgba(0,232,122,0.18), inset 0 1px 0 rgba(0,232,122,0.08);
+  animation: duplex-glow 2s ease-in-out infinite alternate;
+}
+.duplex-btn.active .duplex-icon {
+  color: var(--green-on);
+  text-shadow: 0 0 8px rgba(0,232,122,0.8);
+  animation: spin-icon 0.4s ease-in-out;
+}
+.duplex-btn.active .duplex-label {
+  color: var(--green-on);
+}
+@keyframes spin-icon {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.3); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+@keyframes duplex-glow {
+  from { box-shadow: 0 3px 0 #040d06, 0 0 10px rgba(0,232,122,0.15); }
+  to   { box-shadow: 0 3px 0 #040d06, 0 0 22px rgba(0,232,122,0.3); }
+}
 
 /* toast */
 #toast {
