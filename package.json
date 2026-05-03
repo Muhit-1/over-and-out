@@ -1,0 +1,15 @@
+{
+  "name": "web-walkie-talkie",
+  "version": "1.0.0",
+  "description": "Browser-based walkie-talkie with WebRTC and half-duplex radio rules",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "uuid": "^9.0.0"
+  }
+}
